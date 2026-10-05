@@ -1,0 +1,31 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "migrate:avatars": "node scripts/migrateAvatarsToCloudinary.js",
+    "seed:dummy": "node scripts/seedDummyData.js",
+    "seed:cleanup": "node scripts/cleanupDummyData.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.11.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.4",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.10.3",
+    "nodemailer": "^10.0.13"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
