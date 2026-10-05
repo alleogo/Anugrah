@@ -12,29 +12,25 @@ import {
 } from '../utils/helpers';
 import { X, CheckCircle2, Zap, Shield, Mail, Sparkles } from 'lucide-react';
 
-// Pre-configured accounts for 1-click login (all use the same password)
-const QUICK_LOGIN_PASSWORD = '12345';
-const QUICK_LOGIN_GROUPS = [
-  { title: 'Admin', color: '#dc2626', accounts: [{ name: 'Vipul Admin', email: 'rvipuleo@gmail.com' }] },
-  {
-    title: 'Mentors',
-    color: '#d4a017',
-    accounts: [
-      { name: 'Sanjeev Sharma', email: 'sanjeevw81@gmail.com' },
-      { name: 'Vipul Singh', email: 'vipul31825@gmail.com' },
-      { name: 'Morpankh Mentor', email: 'morpankh328@gmail.com' },
-    ],
-  },
-  {
-    title: 'Mentees',
-    color: '#10b981',
-    accounts: [
-      { name: 'Name Enter', email: 'nameenter06@gmail.com' },
-      { name: 'Rohit OBM', email: 'rohitobm@gmail.com' },
-      { name: 'Shikhar OBM', email: 'shikharobm@gmail.com' },
-    ],
-  },
-];
+// 1-click login for test accounts. Development only: the accounts and their shared password
+// come from frontend/.env.local (never committed), and production builds leave this out entirely.
+// Format: VITE_QUICK_LOGIN_MENTORS="Name:email, Name:email"
+const parseAccounts = (list) =>
+  (list || '')
+    .split(',')
+    .map((entry) => entry.split(':').map((part) => part.trim()))
+    .filter(([name, email]) => name && email)
+    .map(([name, email]) => ({ name, email }));
+
+const QUICK_LOGIN_PASSWORD = import.meta.env.DEV ? import.meta.env.VITE_QUICK_LOGIN_PASSWORD || '' : '';
+const QUICK_LOGIN_GROUPS = import.meta.env.DEV
+  ? [
+      { title: 'Admin', color: '#dc2626', accounts: parseAccounts(import.meta.env.VITE_QUICK_LOGIN_ADMINS) },
+      { title: 'Mentors', color: '#d4a017', accounts: parseAccounts(import.meta.env.VITE_QUICK_LOGIN_MENTORS) },
+      { title: 'Mentees', color: '#10b981', accounts: parseAccounts(import.meta.env.VITE_QUICK_LOGIN_MENTEES) },
+    ].filter((group) => group.accounts.length > 0)
+  : [];
+const showQuickLogin = Boolean(QUICK_LOGIN_PASSWORD) && QUICK_LOGIN_GROUPS.length > 0;
 
 export default function AuthModal({ onClose, onLoginSuccess, initialTab = 'login', initialRole = 'Mentee' }) {
   const [isLogin, setIsLogin] = useState(initialTab !== 'signup');
@@ -346,72 +342,81 @@ export default function AuthModal({ onClose, onLoginSuccess, initialTab = 'login
               </button>
             </div>
 
-            {/* 1-Click Login for Configured Accounts */}
-            <div
-              style={{
-                background: 'var(--bg-surface)',
-                border: '1px dashed var(--border-glass)',
-                borderRadius: 'var(--radius-md)',
-                padding: '12px',
-                marginBottom: '18px',
-              }}
-            >
-              <div
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}
-              >
+            {showQuickLogin && (
+              <>
+                {/* 1-Click Login for Configured Accounts */}
                 <div
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    fontSize: '0.8rem',
-                    color: '#d4a017',
-                    fontWeight: 600,
+                    background: 'var(--bg-surface)',
+                    border: '1px dashed var(--border-glass)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '12px',
+                    marginBottom: '18px',
                   }}
                 >
-                  <Zap size={14} /> Quick 1-Click Login (Pre-Configured Accounts):
-                </div>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Pass: {QUICK_LOGIN_PASSWORD}</span>
-              </div>
-
-              {QUICK_LOGIN_GROUPS.map((group) => (
-                <div key={group.title} style={{ marginBottom: '8px' }}>
                   <div
                     style={{
-                      fontSize: '0.72rem',
-                      color: group.color,
-                      fontWeight: 600,
-                      textTransform: 'uppercase',
-                      marginBottom: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: '8px',
                     }}
                   >
-                    {group.title} ({group.accounts.length})
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontSize: '0.8rem',
+                        color: '#d4a017',
+                        fontWeight: 600,
+                      }}
+                    >
+                      <Zap size={14} /> Quick login
+                    </div>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Test accounts</span>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    {group.accounts.map((account) => (
-                      <button
-                        key={account.email}
-                        type="button"
-                        disabled={loading}
-                        onClick={() => handleQuickLogin(account.email)}
-                        className="btn-secondary"
+
+                  {QUICK_LOGIN_GROUPS.map((group) => (
+                    <div key={group.title} style={{ marginBottom: '8px' }}>
+                      <div
                         style={{
-                          width: '100%',
-                          fontSize: '0.82rem',
-                          padding: '6px 10px',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
+                          fontSize: '0.72rem',
+                          color: group.color,
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                          marginBottom: '4px',
                         }}
                       >
-                        <span>{account.name}</span>
-                        <span className="quick-login-email">{account.email}</span>
-                      </button>
-                    ))}
-                  </div>
+                        {group.title} ({group.accounts.length})
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        {group.accounts.map((account) => (
+                          <button
+                            key={account.email}
+                            type="button"
+                            disabled={loading}
+                            onClick={() => handleQuickLogin(account.email)}
+                            className="btn-secondary"
+                            style={{
+                              width: '100%',
+                              fontSize: '0.82rem',
+                              padding: '6px 10px',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <span>{account.name}</span>
+                            <span className="quick-login-email">{account.email}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
 
             <Alert type="error" message={error} />
             <Alert type="success" message={successMsg} />
