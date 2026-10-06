@@ -192,6 +192,16 @@ const makeUser = (role, i) => {
     domain,
     skills: DOMAINS[domain].slice(0, 2 + (i % 3)),
     experienceYears: role === "Mentor" ? 2 + ((i * 3) % 14) : 0,
+    collegeYear: role === "Mentee" ? pick(["1st year", "2nd year", "3rd year", "4th year", "5th year"], i) : "",
+    interestLevels:
+      role === "Mentee"
+        ? DOMAINS[domain]
+            .slice(0, 2 + (i % 3))
+            .map((name, k) => ({
+              name,
+              level: pick(["Beginner", "Basic", "Intermediate", "Advanced", "Expert"], i + k),
+            }))
+        : [],
     bio:
       role === "Mentor"
         ? `${domain} at ${pick(COMPANIES, i)}. Happy to help with interviews, projects and career choices.`

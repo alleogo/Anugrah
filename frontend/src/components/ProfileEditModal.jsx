@@ -2,7 +2,14 @@ import React, { useState, useRef } from 'react';
 import { api } from '../services/api';
 import ImageCropperModal from './ImageCropperModal';
 import { Alert, Avatar, LinkedInIcon } from './Shared';
-import { INVALID_MOBILE_MESSAGE, isValidMobile, readImageFile, useEscapeKey } from '../utils/helpers';
+import {
+  COLLEGE_YEARS,
+  INTEREST_LEVELS,
+  INVALID_MOBILE_MESSAGE,
+  isValidMobile,
+  readImageFile,
+  useEscapeKey,
+} from '../utils/helpers';
 import { X, Save, Sparkles, Camera, Loader, Crop, Trash2 } from 'lucide-react';
 
 // Form values taken from the saved user
@@ -14,6 +21,11 @@ const formFromUser = (user) => ({
   domain: user?.domain || '',
   skills: Array.isArray(user?.skills) ? user.skills.join(', ') : '',
   experienceYears: user?.experienceYears !== undefined ? String(user.experienceYears) : '',
+  // Mentees: year in college and each interest with a level. Older profiles start from their plain interests.
+  collegeYear: user?.collegeYear || '',
+  interests: user?.interestLevels?.length
+    ? user.interestLevels.map((i) => ({ name: i.name, level: i.level }))
+    : (user?.skills?.length ? user.skills : ['']).map((name) => ({ name, level: '' })),
   bio: user?.bio || '',
   linkedinUrl: user?.linkedinUrl || '',
 });
@@ -149,6 +161,16 @@ export default function ProfileEditModal({ onClose, currentUser, onProfileUpdate
     }
   };
 
+  // Editing the mentee's interest rows
+  const updateInterest = (index, key, value) =>
+    setForm((prev) => ({
+      ...prev,
+      interests: prev.interests.map((item, i) => (i === index ? { ...item, [key]: value } : item)),
+    }));
+  const addInterest = () => setForm((prev) => ({ ...prev, interests: [...prev.interests, { name: '', level: '' }] }));
+  const removeInterest = (index) =>
+    setForm((prev) => ({ ...prev, interests: prev.interests.filter((_, i) => i !== index) }));
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -157,6 +179,21 @@ export default function ProfileEditModal({ onClose, currentUser, onProfileUpdate
     if (!form.firstname.trim() || !form.lastname.trim()) {
       setError('First name and last name are required.');
       return;
+    }
+    const interests = form.interests.map((i) => ({ name: i.name.trim(), level: i.level })).filter((i) => i.name);
+    if (role === 'Mentee') {
+      if (!form.collegeYear) {
+        setError('Select your current year in college.');
+        return;
+      }
+      if (!interests.length) {
+        setError('Add at least one area of interest.');
+        return;
+      }
+      if (interests.some((i) => !i.level)) {
+        setError('Choose your level for every area of interest.');
+        return;
+      }
     }
     if (!isValidMobile(form.mobileNumber)) {
       setError(INVALID_MOBILE_MESSAGE);
@@ -171,11 +208,15 @@ export default function ProfileEditModal({ onClose, currentUser, onProfileUpdate
         mobileNumber: form.mobileNumber.trim(),
         organization: form.organization.trim(),
         domain: form.domain.trim(),
-        skills: form.skills
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean),
-        experienceYears: Number(form.experienceYears) || 0,
+        ...(role === 'Mentee'
+          ? { collegeYear: form.collegeYear, interestLevels: interests }
+          : {
+              skills: form.skills
+                .split(',')
+                .map((s) => s.trim())
+                .filter(Boolean),
+            }),
+        ...(role === 'Mentor' && { experienceYears: Number(form.experienceYears) || 0 }),
         bio: form.bio.trim(),
         linkedinUrl: form.linkedinUrl.trim(),
       });
@@ -551,37 +592,116 @@ export default function ProfileEditModal({ onClose, currentUser, onProfileUpdate
             </div>
           </div>
 
-          {/* Skills / Expertise or Areas of Interest */}
-          <div>
-            <label
-              style={{
-                display: 'block',
-                fontSize: '0.82rem',
-                fontWeight: 600,
-                color: 'var(--text-secondary)',
-                marginBottom: '4px',
-              }}
-            >
-              {role === 'Mentee'
-                ? 'Areas of Interest (Comma-separated)'
-                : role === 'Admin'
-                  ? 'Administrative Focus / Operational Areas (Comma-separated)'
-                  : 'Skills & Expertise (Comma-separated)'}
-            </label>
-            <input
-              type="text"
-              value={form.skills}
-              onChange={setField('skills')}
-              placeholder={
-                role === 'Mentee'
-                  ? 'e.g. Web Development, AI / ML, Cloud Computing, System Design'
-                  : role === 'Admin'
-                    ? 'e.g. Community Operations, Program Leadership, Admissions'
-                    : 'e.g. System Design, Distributed Systems, Python, React, Leadership'
-              }
-              className="input-field"
-            />
-          </div>
+          {role === 'Mentee' ? (
+            <>
+              {/* Mentees: current year in college (required) */}
+              <div>
+                <label htmlFor="edit-college-year" className="form-label">
+                  Current Year in College (Required)
+                </label>
+                <select
+                  id="edit-college-year"
+                  required
+                  value={form.collegeYear}
+                  onChange={setField('collegeYear')}
+                  className="input-field"
+                >
+                  <option value="">Select your year</option>
+                  {COLLEGE_YEARS.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Mentees: areas of interest, each with a level (required) */}
+              <div>
+                <span className="form-label">Areas of Interest and Your Level (Required)</span>
+                <div className="interest-rows">
+                  {form.interests.map((item, index) => (
+                    <div key={index} className="interest-row">
+                      <input
+                        type="text"
+                        value={item.name}
+                        onChange={(e) => updateInterest(index, 'name', e.target.value)}
+                        placeholder="e.g. Web Development"
+                        className="input-field"
+                        aria-label={`Area of interest ${index + 1}`}
+                      />
+                      <select
+                        value={item.level}
+                        onChange={(e) => updateInterest(index, 'level', e.target.value)}
+                        className="input-field"
+                        aria-label={`Your level in area ${index + 1}`}
+                      >
+                        <option value="">Level</option>
+                        {INTEREST_LEVELS.map((level) => (
+                          <option key={level} value={level}>
+                            {level}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        className="interest-remove"
+                        onClick={() => removeInterest(index)}
+                        disabled={form.interests.length === 1}
+                        aria-label={`Remove area ${index + 1}`}
+                        title="Remove"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button type="button" className="btn-secondary interest-add" onClick={addInterest}>
+                  + Add another area
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className={role === 'Mentor' ? 'form-row-2' : undefined}>
+              {/* Mentors and admins: comma-separated skills */}
+              <div>
+                <label htmlFor="edit-skills" className="form-label">
+                  {role === 'Admin' ? 'Administrative Focus (Comma-separated)' : 'Skills & Expertise (Comma-separated)'}
+                </label>
+                <input
+                  id="edit-skills"
+                  type="text"
+                  value={form.skills}
+                  onChange={setField('skills')}
+                  placeholder={
+                    role === 'Admin'
+                      ? 'e.g. Community Operations, Program Leadership'
+                      : 'e.g. System Design, Python, React, Leadership'
+                  }
+                  className="input-field"
+                />
+              </div>
+
+              {/* Mentors: years of experience, shown on their profile card */}
+              {role === 'Mentor' && (
+                <div>
+                  <label htmlFor="edit-experience" className="form-label">
+                    Experience (Years)
+                  </label>
+                  <input
+                    id="edit-experience"
+                    type="number"
+                    min="0"
+                    max="60"
+                    step="1"
+                    value={form.experienceYears}
+                    onChange={setField('experienceYears')}
+                    placeholder="e.g. 8"
+                    className="input-field"
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Bio */}
           <div>

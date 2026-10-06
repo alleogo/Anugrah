@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '../services/api';
 import { Alert, Avatar, LoadingBlocks, PageHeader } from './Shared';
 import { useToast } from '../utils/toast';
-import { fullName, matchesSearch } from '../utils/helpers';
+import { fullName, isMenteeProfileComplete, matchesSearch } from '../utils/helpers';
 import {
   Send,
   Clock,
@@ -21,6 +21,7 @@ import {
   SlidersHorizontal,
   RotateCcw,
   MessageSquare,
+  Camera,
 } from 'lucide-react';
 
 // Standard disciplines offered when requesting a general allotment
@@ -61,6 +62,7 @@ export default function MenteeDashboard({
   onOpenChat,
   openGeneralModalTrigger,
   onCanRequestChange,
+  onOpenEditProfile,
 }) {
   const [allottedMentor, setAllottedMentor] = useState(null);
   const [mentors, setMentors] = useState([]);
@@ -222,6 +224,33 @@ export default function MenteeDashboard({
       {currentView === 'dashboard' ? (
         <>
           <PageHeader title={`Welcome back, ${user.firstname}`} />
+
+          {/* Year in college and leveled interests are needed before requesting a mentor */}
+          {!isMenteeProfileComplete(user) && (
+            <div className="dashboard-notice notice-required">
+              <div>
+                <strong>Complete your profile to request a mentor</strong>
+                <p>Add your current year in college and your areas of interest with your level in each.</p>
+              </div>
+              <button type="button" className="btn-primary" onClick={onOpenEditProfile}>
+                Complete profile
+              </button>
+            </div>
+          )}
+
+          {/* Tip shown until the mentee adds a photo */}
+          {!user.avatar && (
+            <div className="dashboard-notice notice-tip">
+              <Camera size={18} className="notice-icon" />
+              <div>
+                <strong>Add a profile picture</strong>
+                <p>Profiles with a photo are more likely to get a mentor.</p>
+              </div>
+              <button type="button" className="btn-secondary" onClick={onOpenEditProfile}>
+                Add photo
+              </button>
+            </div>
+          )}
 
           {/* Overview: current mentor (or request status) next to the request history */}
           <div className="mentee-overview">

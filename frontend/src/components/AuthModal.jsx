@@ -8,6 +8,7 @@ import {
   STORAGE_KEYS,
   isValidEmail,
   isValidMobile,
+  COLLEGE_YEARS,
   storage,
 } from '../utils/helpers';
 import { X, CheckCircle2, Zap, Shield, Mail, Sparkles } from 'lucide-react';
@@ -47,6 +48,7 @@ export default function AuthModal({ onClose, onLoginSuccess, initialTab = 'login
   const [password, setPassword] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
   const [otp, setOtp] = useState('');
+  const [collegeYear, setCollegeYear] = useState('');
 
   // Confirmation screen state for mentor signup
   const [mentorSignupConfirmed, setMentorSignupConfirmed] = useState(false);
@@ -99,6 +101,10 @@ export default function AuthModal({ onClose, onLoginSuccess, initialTab = 'login
     setError('');
     setSuccessMsg('');
 
+    if (!isLogin && role === 'Mentee' && !collegeYear) {
+      setError('Select your current year in college.');
+      return;
+    }
     if (!isLogin && !isValidMobile(mobileNumber)) {
       setError(INVALID_MOBILE_MESSAGE);
       return;
@@ -127,6 +133,7 @@ export default function AuthModal({ onClose, onLoginSuccess, initialTab = 'login
           password,
           role,
           otp: otp.trim(),
+          collegeYear: role === 'Mentee' ? collegeYear : undefined,
         });
         saveToken(res);
 
@@ -531,6 +538,38 @@ export default function AuthModal({ onClose, onLoginSuccess, initialTab = 'login
                       />
                     </div>
                   </div>
+
+                  {/* Mentees: current year in college (required) */}
+                  {role === 'Mentee' && (
+                    <div>
+                      <label
+                        htmlFor="signup-college-year"
+                        style={{
+                          display: 'block',
+                          fontSize: '0.82rem',
+                          fontWeight: 600,
+                          color: 'var(--text-secondary)',
+                          marginBottom: '4px',
+                        }}
+                      >
+                        Current Year in College (Required)
+                      </label>
+                      <select
+                        id="signup-college-year"
+                        required
+                        value={collegeYear}
+                        onChange={(e) => setCollegeYear(e.target.value)}
+                        className="input-field"
+                      >
+                        <option value="">Select your year</option>
+                        {COLLEGE_YEARS.map((year) => (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                   {/* Mobile Number with Privacy Micro-Copy */}
                   <div>

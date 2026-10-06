@@ -87,6 +87,12 @@ export default function UserProfileModal({
   const canMessage = isVerified(currentUser) && isVerified(user);
   const showChatButton = !isOwnProfile && onOpenChat && !(currentUser?.role === 'Mentee' && user.role === 'Mentee');
 
+  // Interests with levels for mentees; plain skills otherwise
+  const chips =
+    user.role === 'Mentee' && user.interestLevels?.length
+      ? user.interestLevels
+      : (user.skills || []).map((name) => ({ name }));
+
   const verificationBadge = user.isApproved ? (
     <span className="badge badge-emerald" style={VERIFICATION_BADGE_STYLE}>
       <ShieldCheck size={13} /> Verified
@@ -249,7 +255,22 @@ export default function UserProfileModal({
               </div>
             )}
 
-            {user.experienceYears > 0 && (
+            {user.role === 'Mentee' && user.collegeYear && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  marginTop: '4px',
+                  fontSize: '0.78rem',
+                  color: 'var(--text-muted)',
+                }}
+              >
+                <GraduationCap size={13} color="#10b981" />
+                <span>{user.collegeYear} in college</span>
+              </div>
+            )}
+            {user.role === 'Mentor' && user.experienceYears > 0 && (
               <div
                 style={{
                   display: 'flex',
@@ -347,7 +368,7 @@ export default function UserProfileModal({
         </div>
 
         {/* Skills / Expertise Tags if present */}
-        {Array.isArray(user.skills) && user.skills.length > 0 && (
+        {chips.length > 0 && (
           <div style={{ marginBottom: '18px' }}>
             <h4
               style={{
@@ -360,7 +381,7 @@ export default function UserProfileModal({
               {user.role === 'Mentee' ? 'Interests' : 'Skills'}
             </h4>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              {user.skills.map((skill, idx) => (
+              {chips.map((chip, idx) => (
                 <span
                   key={idx}
                   style={{
@@ -373,7 +394,8 @@ export default function UserProfileModal({
                     border: '1px solid rgba(245, 158, 11, 0.25)',
                   }}
                 >
-                  {skill}
+                  {chip.name}
+                  {chip.level && <span className="chip-level">| {chip.level}</span>}
                 </span>
               ))}
             </div>

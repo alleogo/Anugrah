@@ -929,7 +929,7 @@ export default function AdminDashboard({
                             }}
                           >
                             <GraduationCap size={12} color="#a0896b" />
-                            <span>{mentee.organization}</span>
+                            <span>{[mentee.organization, mentee.collegeYear].filter(Boolean).join(' | ')}</span>
                           </div>
                         )}
 

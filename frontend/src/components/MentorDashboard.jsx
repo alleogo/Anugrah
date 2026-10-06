@@ -215,7 +215,7 @@ export default function MentorDashboard({ currentUser: user, onViewProfile, onOp
                           }}
                         >
                           <GraduationCap size={11} />
-                          <span>{mentee.organization}</span>
+                          <span>{[mentee.organization, mentee.collegeYear].filter(Boolean).join(' | ')}</span>
                         </div>
                       ) : (
                         <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>Mentee</span>
@@ -458,7 +458,7 @@ export default function MentorDashboard({ currentUser: user, onViewProfile, onOp
                             }}
                           >
                             <GraduationCap size={11} />
-                            <span>{mentee.organization}</span>
+                            <span>{[mentee.organization, mentee.collegeYear].filter(Boolean).join(' | ')}</span>
                           </div>
                         ) : (
                           <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>Mentee</span>

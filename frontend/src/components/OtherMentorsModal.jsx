@@ -211,7 +211,14 @@ export default function OtherMentorsModal({ onClose, onViewProfile }) {
                         }}
                       >
                         <Briefcase size={12} color="#a0896b" />
-                        <span>{mentor.organization}</span>
+                        <span>
+                          {[
+                            mentor.organization,
+                            mentor.experienceYears > 0 && `${mentor.experienceYears} yrs experience`,
+                          ]
+                            .filter(Boolean)
+                            .join(' | ')}
+                        </span>
                       </div>
                     )}
 

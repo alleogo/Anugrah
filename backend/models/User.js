@@ -64,6 +64,20 @@ const userSchema = new mongoose.Schema(
         trim: true,
       },
     ],
+    // Mentees: current year in college, e.g. "2nd year"
+    collegeYear: {
+      type: String,
+      enum: ["", "1st year", "2nd year", "3rd year", "4th year", "5th year"],
+      default: "",
+    },
+    // Mentees: each area of interest with their level in it
+    interestLevels: [
+      {
+        _id: false,
+        name: { type: String, trim: true, required: true },
+        level: { type: String, enum: ["Beginner", "Basic", "Intermediate", "Advanced", "Expert"], required: true },
+      },
+    ],
     experienceYears: {
       type: Number,
       default: 0,

@@ -101,3 +101,11 @@ export const isValidMobile = (value) => {
 
 export const INVALID_MOBILE_MESSAGE = 'Enter a valid 10-digit mobile number.';
 export const INVALID_EMAIL_MESSAGE = 'Enter a valid email address.';
+
+// Mentee profile options (same lists as the backend)
+export const COLLEGE_YEARS = ['1st year', '2nd year', '3rd year', '4th year', '5th year'];
+export const INTEREST_LEVELS = ['Beginner', 'Basic', 'Intermediate', 'Advanced', 'Expert'];
+
+// A mentee can request a mentor once their year and leveled interests are filled in
+export const isMenteeProfileComplete = (user) =>
+  COLLEGE_YEARS.includes(user?.collegeYear) && (user?.interestLevels || []).length > 0;

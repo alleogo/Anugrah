@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 import AllotmentRequest from "../models/AllotmentRequest.js";
-import { PUBLIC_FIELDS, sendServerError } from "../utils/helpers.js";
+import { PUBLIC_FIELDS, isMenteeProfileComplete, sendServerError } from "../utils/helpers.js";
 
 const GENERAL_REQUEST_MESSAGE =
   "General mentor allotment request submitted successfully! An administrator will review and pair you with an experienced mentor.";
@@ -30,6 +30,12 @@ const createAllotmentRequest = async (req, res, preferredMentorIds) => {
   try {
     if (req.user.mentor) {
       return res.status(400).json({ success: false, message: "You already have an allotted mentor" });
+    }
+    if (!isMenteeProfileComplete(req.user)) {
+      return res.status(400).json({
+        success: false,
+        message: "Complete your profile first: add your year in college and your areas of interest with levels.",
+      });
     }
 
     // Only the mentee's own pending request blocks a new one.

@@ -101,6 +101,8 @@
 }
 
 body {
+  /* Long unbroken text (emails, links) wraps instead of spilling out of its box */
+  overflow-wrap: break-word;
   font-family: var(--font-body);
   background-color: var(--bg-main);
   color: var(--text-main);
@@ -1929,7 +1931,7 @@ select.input-field option {
 
 @media (max-width: 1024px) {
   .mentee-overview {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr); /* minmax(0, ...) lets cards shrink to the screen width */
   }
 }
 
@@ -2310,4 +2312,115 @@ select.input-field option {
 .back-button:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
+}
+
+/* Form label used in Edit Profile */
+.form-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+/* Mentee interests: name + level + remove, one row each */
+.interest-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.interest-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px 36px;
+  gap: 8px;
+  align-items: center;
+}
+
+.interest-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.interest-remove:hover:not(:disabled) {
+  border-color: var(--accent-coral);
+  color: var(--accent-coral);
+}
+
+.interest-remove:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.interest-add {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  padding: 6px 12px;
+}
+
+@media (max-width: 560px) {
+  .interest-row {
+    grid-template-columns: minmax(0, 1fr) 36px;
+  }
+  .interest-row select {
+    grid-column: 1;
+  }
+  .interest-row .interest-remove {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+}
+
+/* Level shown next to an interest on profile cards */
+.chip-level {
+  margin-left: 4px;
+  font-weight: 500;
+  opacity: 0.75;
+}
+
+/* Mentee dashboard notices: a required step (amber) and a gentle tip (neutral) */
+.dashboard-notice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+}
+
+.dashboard-notice > div {
+  flex: 1 1 240px;
+}
+
+.dashboard-notice strong {
+  display: block;
+  font-size: 0.92rem;
+  color: var(--text-main);
+}
+
+.dashboard-notice p {
+  margin-top: 2px;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.notice-required {
+  border-color: var(--border-strong);
+  border-left: 4px solid var(--primary);
+  background: var(--primary-light);
+}
+
+.notice-tip .notice-icon {
+  color: var(--primary);
+  flex-shrink: 0;
 }

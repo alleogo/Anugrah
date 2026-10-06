@@ -11,6 +11,8 @@ import {
   CONTACT_FIELDS,
   INVALID_EMAIL_MESSAGE,
   INVALID_MOBILE_MESSAGE,
+  COLLEGE_YEARS,
+  INTEREST_LEVELS,
   isValidEmail,
   normalizeMobile,
   sendServerError,
@@ -66,7 +68,7 @@ export const sendOTP = async (req, res) => {
 // Register a Mentor or Mentee (email OTP required)
 export const signup = async (req, res) => {
   try {
-    const { firstname, lastname, email, password, role, otp, mobileNumber } = req.body;
+    const { firstname, lastname, email, password, role, otp, mobileNumber, collegeYear } = req.body;
 
     if (!firstname || !lastname || !email || !password || !role || !mobileNumber) {
       return res.status(400).json({ success: false, message: "All fields including mobile number are required" });
@@ -83,6 +85,9 @@ export const signup = async (req, res) => {
     const mobile = normalizeMobile(mobileNumber);
     if (!mobile) {
       return res.status(400).json({ success: false, message: INVALID_MOBILE_MESSAGE });
+    }
+    if (role === "Mentee" && !COLLEGE_YEARS.includes(collegeYear)) {
+      return res.status(400).json({ success: false, message: "Select your current year in college." });
     }
     if (!isValidEmail(email)) {
       return res.status(400).json({ success: false, message: INVALID_EMAIL_MESSAGE });
@@ -119,6 +124,7 @@ export const signup = async (req, res) => {
       mobileNumber: mobile,
       password: await bcrypt.hash(password, 10),
       role,
+      collegeYear: role === "Mentee" ? collegeYear : "",
       isApproved: false,
       verificationRequested: true,
       verificationRequestedAt: new Date(),
@@ -207,7 +213,16 @@ export const updateProfile = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    const { firstname, lastname, mobileNumber, skills, experienceYears, submitForVerification } = req.body;
+    const {
+      firstname,
+      lastname,
+      mobileNumber,
+      skills,
+      experienceYears,
+      collegeYear,
+      interestLevels,
+      submitForVerification,
+    } = req.body;
 
     if (firstname) user.firstname = firstname.trim();
     if (lastname) user.lastname = lastname.trim();
@@ -222,8 +237,40 @@ export const updateProfile = async (req, res) => {
     for (const field of ["organization", "bio", "linkedinUrl", "domain"]) {
       if (req.body[field] !== undefined) user[field] = req.body[field].trim();
     }
-    if (Array.isArray(skills)) user.skills = skills.map((s) => s.trim()).filter(Boolean);
-    if (experienceYears !== undefined) user.experienceYears = Number(experienceYears) || 0;
+    if (user.role === "Mentee") {
+      // Year in college and leveled interests are required for mentees
+      if (collegeYear !== undefined) {
+        if (!COLLEGE_YEARS.includes(collegeYear)) {
+          return res.status(400).json({ success: false, message: "Select your current year in college." });
+        }
+        user.collegeYear = collegeYear;
+      }
+      if (interestLevels !== undefined) {
+        const interests = (Array.isArray(interestLevels) ? interestLevels : [])
+          .map((i) => ({ name: String(i?.name || "").trim(), level: i?.level }))
+          .filter((i) => i.name);
+        if (!interests.length) {
+          return res.status(400).json({ success: false, message: "Add at least one area of interest." });
+        }
+        if (interests.some((i) => !INTEREST_LEVELS.includes(i.level))) {
+          return res.status(400).json({ success: false, message: "Choose your level for every area of interest." });
+        }
+        user.interestLevels = interests;
+        user.skills = interests.map((i) => i.name); // keeps search by interest working
+      }
+    } else if (Array.isArray(skills)) {
+      user.skills = skills.map((s) => s.trim()).filter(Boolean);
+    }
+
+    if (experienceYears !== undefined) {
+      const years = Number(experienceYears);
+      if (!Number.isInteger(years) || years < 0 || years > 60) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Experience must be a whole number of years (0 to 60)." });
+      }
+      user.experienceYears = years;
+    }
 
     if (submitForVerification) {
       user.profileSubmitted = true;

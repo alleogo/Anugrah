@@ -300,6 +300,7 @@ export default function App() {
                   onOpenChat={handleOpenChat}
                   openGeneralModalTrigger={generalModalTrigger}
                   onCanRequestChange={setMenteeCanRequest}
+                  onOpenEditProfile={handleOpenEditProfile}
                 />
               )}
               {currentUser.role === 'Mentor' && (
