@@ -17,13 +17,13 @@ cloudinary.config({
 
 // Upload an image or video (data URI, URL or file path) and return its URL.
 // `folder` is placed under the "anugrah/" root folder.
-export const uploadMedia = async (file, { folder, publicId, transformation } = {}) => {
+export const uploadMedia = async (file, { folder, publicId, transformation, resourceType = "auto" } = {}) => {
   const result = await cloudinary.uploader.upload(file, {
     folder: `${ROOT_FOLDER}/${folder}`,
     public_id: publicId,
     overwrite: Boolean(publicId),
     invalidate: Boolean(publicId),
-    resource_type: "auto", // detects image or video
+    resource_type: resourceType, // "auto" detects image or video
     transformation,
   });
   return result.secure_url;
@@ -34,6 +34,7 @@ export const uploadAvatar = (dataUri, userId) =>
   uploadMedia(dataUri, {
     folder: "avatars",
     publicId: String(userId),
+    resourceType: "image", // Cloudinary refuses anything that is not an image
     transformation: [
       { width: 400, height: 400, crop: "fill", gravity: "face" },
       { quality: "auto" },

@@ -446,6 +446,10 @@ export const uploadAvatar = async (req, res) => {
     if (!image) {
       return res.status(400).json({ success: false, message: "Image data is required" });
     }
+    // Only real images (no SVG, which can carry scripts)
+    if (!/^data:image\/(?!svg)[a-z0-9.+-]+;base64,/i.test(image)) {
+      return res.status(400).json({ success: false, message: "Please upload an image file (JPG, PNG, WEBP or GIF)." });
+    }
 
     const avatar = await uploadToCloudinary(image, req.user._id);
     const user = await saveAvatar(req.user._id, avatar);
