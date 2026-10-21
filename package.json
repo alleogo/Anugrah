@@ -1,0 +1,9 @@
+{
+  "name": "anugrah",
+  "private": true,
+  "type": "module",
+  "description": "Anugrah mentorship platform: React frontend (frontend/) and Express API (backend/), deployed together on Vercel",
+  "engines": {
+    "node": ">=20"
+  }
+}

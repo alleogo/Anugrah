@@ -16,7 +16,9 @@ export default function ChatModal({ currentUser, targetUser, onClose }) {
   const isVerifiedSender = isVerified(currentUser);
   const isVerifiedReceiver = isVerified(targetUser);
   const isMenteeToMentee = currentUser?.role === 'Mentee' && targetUser?.role === 'Mentee';
-  const canChat = isVerifiedSender && isVerifiedReceiver && !isMenteeToMentee;
+  // Chats with the admin are always open; otherwise both must be verified and not two mentees
+  const withAdmin = currentUser?.role === 'Admin' || targetUser?.role === 'Admin';
+  const canChat = withAdmin || (isVerifiedSender && isVerifiedReceiver && !isMenteeToMentee);
 
   const fetchChat = async () => {
     if (!targetUser?._id) return;

@@ -25,6 +25,11 @@ export const auth = async (req, res, next) => {
       return res.status(401).json({ success: false, message: "User not found with this token." });
     }
 
+    // A password change signs out every older session
+    if (user.passwordChangedAt && decoded.iat * 1000 < user.passwordChangedAt.getTime()) {
+      return res.status(401).json({ success: false, message: "Your password was changed. Please sign in again." });
+    }
+
     req.user = user;
     next();
   } catch (error) {

@@ -2424,3 +2424,173 @@ select.input-field option {
   color: var(--primary);
   flex-shrink: 0;
 }
+
+/* Forgot-password form inside the sign-in window */
+.forgot-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.forgot-form h2 {
+  font-size: 1.3rem;
+  margin: 8px 0 6px;
+}
+
+.forgot-help {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.forgot-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.forgot-submit {
+  width: 100%;
+  padding: 11px;
+  margin-top: 8px;
+}
+
+.forgot-link,
+.forgot-resend {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--primary);
+}
+
+.forgot-resend {
+  align-self: center;
+}
+
+/* Messages inbox */
+.messages-dialog {
+  max-width: 520px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.messages-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.messages-header h2 {
+  margin: 0;
+}
+
+.messages-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.messages-empty {
+  padding: 24px 4px;
+  text-align: center;
+}
+
+.messages-list {
+  list-style: none;
+  overflow-y: auto;
+  margin: 0 -8px;
+}
+
+.messages-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 8px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.messages-row:hover,
+.messages-row:focus-visible {
+  background: var(--bg-surface);
+}
+
+.messages-row-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.messages-row-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.messages-name {
+  font-weight: 600;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.messages-time {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.messages-preview {
+  margin-top: 2px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.messages-preview.unread {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.messages-unread,
+.sidebar-unread {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  color: var(--primary-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.sidebar-unread {
+  margin-left: auto;
+}
+
+/* The inbox sits below the chat window it opens */
+.messages-backdrop {
+  z-index: 2400;
+}

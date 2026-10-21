@@ -102,6 +102,11 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    // Set when the password changes; login tokens issued before this stop working
+    passwordChangedAt: {
+      type: Date,
+      default: null,
+    },
     mentee: [
       {
         type: mongoose.Schema.Types.ObjectId,

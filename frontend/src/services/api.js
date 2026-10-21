@@ -30,6 +30,8 @@ export const api = {
   signup: (payload) => request('/auth/signup', 'POST', payload),
   login: (credentials) => request('/auth/login', 'POST', credentials),
   logout: () => request('/auth/logout', 'POST'),
+  forgotPassword: (email) => request('/auth/forgot-password', 'POST', { email }),
+  resetPassword: (payload) => request('/auth/reset-password', 'POST', payload),
   getMe: () => request('/auth/me'),
   deleteMyAccount: (password) => request('/auth/me', 'DELETE', { password }),
   updateProfile: (payload) => request('/auth/profile', 'PUT', payload),
@@ -57,6 +59,7 @@ export const api = {
   // Chat
   sendMessage: (receiverId, message) => request('/communication/send', 'POST', { receiverId, message }),
   getMessages: (otherUserId) => request(`/communication/messages/${otherUserId}`),
+  getConversations: () => request('/communication/conversations'),
 
   // Admin
   getUsers: () => request('/admin/users'),

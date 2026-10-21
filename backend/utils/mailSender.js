@@ -60,3 +60,26 @@ export const otpEmailTemplate = (otp) => `
     </div>
   </div>
 `;
+
+// HTML body for the password reset code email
+export const resetEmailTemplate = (code) => `
+  <div style="font-family: Arial, sans-serif; max-width: 540px; margin: 0 auto; background-color: #0c0d10; color: #f8fafc; padding: 32px; border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.25);">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <h1 style="color: #fbbf24; margin: 0; font-size: 26px;">Anugrah</h1>
+      <p style="color: #94a3b8; font-size: 13px; margin: 4px 0 0 0;">Mentorship & Guidance Platform</p>
+    </div>
+    <div style="background-color: #17191e; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 24px; text-align: center;">
+      <h2 style="color: #f8fafc; font-size: 18px; margin: 0 0 12px 0;">Reset your password</h2>
+      <p style="color: #94a3b8; font-size: 14px; margin: 0 0 20px 0; line-height: 1.5;">
+        Use this code to set a new password for your Anugrah account:
+      </p>
+      <div style="display: inline-block; border: 1px solid #f59e0b; padding: 14px 32px; border-radius: 8px; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #fbbf24; margin-bottom: 20px;">
+        ${code}
+      </div>
+      <p style="color: #94a3b8; font-size: 13px; margin: 0 0 6px 0;">This code is valid for 5 minutes.</p>
+      <p style="color: #64748b; font-size: 12px; margin: 0;">
+        If you did not ask to reset your password, you can ignore this email. Your password stays the same.
+      </p>
+    </div>
+  </div>
+`;

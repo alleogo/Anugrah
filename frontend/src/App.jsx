@@ -11,6 +11,7 @@ import ProfileEditModal from './components/ProfileEditModal';
 import OtherMentorsModal from './components/OtherMentorsModal';
 import SettledRequestsModal from './components/SettledRequestsModal';
 import ChatModal from './components/ChatModal';
+import MessagesModal from './components/MessagesModal';
 import { api } from './services/api';
 import { STORAGE_KEYS, storage } from './utils/helpers';
 import { useToast } from './utils/toast';
@@ -60,6 +61,8 @@ export default function App() {
   const [otherMentorsModalOpen, setOtherMentorsModalOpen] = useState(false);
   const [settledRequestsModalOpen, setSettledRequestsModalOpen] = useState(false);
   const [chatTargetUser, setChatTargetUser] = useState(null);
+  const [messagesOpen, setMessagesOpen] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const [menteeView, setMenteeView] = useState('dashboard');
   const [adminTab, setAdminTab] = useState('requests');
 
@@ -123,6 +126,19 @@ export default function App() {
     setCurrentUser(user);
     storage.set(STORAGE_KEYS.user, JSON.stringify(user));
   };
+
+  // Unread message count for the sidebar: checked on login, every 30 seconds, and after a chat closes
+  useEffect(() => {
+    if (!currentUser) return;
+    const refreshUnread = () =>
+      api
+        .getConversations()
+        .then((res) => setUnreadMessages((res.conversations || []).reduce((sum, c) => sum + c.unreadCount, 0)))
+        .catch(() => {});
+    refreshUnread();
+    const timer = setInterval(refreshUnread, 30000);
+    return () => clearInterval(timer);
+  }, [currentUser?._id, chatTargetUser]);
 
   // On load: refresh the session and fetch landing-page stats
   useEffect(() => {
@@ -249,6 +265,8 @@ export default function App() {
             onOpenSettledRequests={() => setSettledRequestsModalOpen(true)}
             mentorPending={mentorPending}
             onRequestVerification={handleRequestVerification}
+            onOpenMessages={() => setMessagesOpen(true)}
+            unreadMessages={unreadMessages}
             onOpenGeneralRequest={
               menteeCanRequest
                 ? () => {
@@ -378,6 +396,15 @@ export default function App() {
       )}
 
       {/* Global Direct Chat Modal */}
+      {messagesOpen && currentUser && (
+        <MessagesModal
+          onClose={() => setMessagesOpen(false)}
+          onOpenChat={setChatTargetUser}
+          refreshKey={chatTargetUser ? 'chat-open' : 'chat-closed'}
+          chatOpen={Boolean(chatTargetUser)}
+        />
+      )}
+
       {chatTargetUser && (
         <ChatModal currentUser={currentUser} targetUser={chatTargetUser} onClose={() => setChatTargetUser(null)} />
       )}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import AnugrahLogo from './AnugrahLogo';
+import ForgotPasswordForm from './ForgotPasswordForm';
 import { Alert } from './Shared';
 import { api } from '../services/api';
 import {
@@ -35,6 +36,7 @@ const showQuickLogin = Boolean(QUICK_LOGIN_PASSWORD) && QUICK_LOGIN_GROUPS.lengt
 
 export default function AuthModal({ onClose, onLoginSuccess, initialTab = 'login', initialRole = 'Mentee' }) {
   const [isLogin, setIsLogin] = useState(initialTab !== 'signup');
+  const [forgotMode, setForgotMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
   const [error, setError] = useState('');
@@ -216,7 +218,20 @@ export default function AuthModal({ onClose, onLoginSuccess, initialTab = 'login
           </button>
         )}
 
-        {mentorSignupConfirmed ? (
+        {forgotMode ? (
+          <ForgotPasswordForm
+            initialEmail={email}
+            onCancel={() => setForgotMode(false)}
+            onDone={(resetEmail) => {
+              setForgotMode(false);
+              setIsLogin(true);
+              setEmail(resetEmail);
+              setPassword('');
+              setError('');
+              setSuccessMsg('Password updated. Sign in with your new password.');
+            }}
+          />
+        ) : mentorSignupConfirmed ? (
           <div style={{ textAlign: 'center', padding: '12px 6px' }}>
             <div
               style={{
@@ -705,6 +720,11 @@ export default function AuthModal({ onClose, onLoginSuccess, initialTab = 'login
                   className="input-field"
                   autoComplete={isLogin ? 'current-password' : 'new-password'}
                 />
+                {isLogin && (
+                  <button type="button" className="link-button forgot-link" onClick={() => setForgotMode(true)}>
+                    Forgot password?
+                  </button>
+                )}
               </div>
 
               <button

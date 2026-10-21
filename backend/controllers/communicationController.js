@@ -6,10 +6,11 @@ import { isVerified, sendServerError } from "../utils/helpers.js";
 const CHAT_USER_FIELDS = "firstname lastname email role isApproved avatar";
 
 // Chat rules:
-// - Both users must be verified (Admins always are)
-// - Mentees cannot message other mentees
+// - Conversations with an Admin are always allowed (even for unverified accounts)
+// - Otherwise both users must be verified, and mentees cannot message other mentees
 const checkChatAllowed = (userA, userB) => {
   if (!userA || !userB) return { allowed: false, reason: "User not found." };
+  if (userA.role === "Admin" || userB.role === "Admin") return { allowed: true };
 
   if (!isVerified(userA) || !isVerified(userB)) {
     return { allowed: false, reason: "Messages are only allowed between verified accounts." };
@@ -100,10 +101,6 @@ export const getMessages = async (req, res) => {
 export const getConversations = async (req, res) => {
   try {
     const me = req.user;
-    if (!isVerified(me)) {
-      return res.status(200).json({ success: true, conversations: [] });
-    }
-
     const fields = `${CHAT_USER_FIELDS} organization`;
     const messages = await Message.find({ $or: [{ sender: me._id }, { receiver: me._id }] })
       .sort({ createdAt: -1 })
@@ -123,6 +120,7 @@ export const getConversations = async (req, res) => {
           user: other,
           lastMessage: msg.message,
           lastMessageAt: msg.createdAt,
+          lastMessageFromMe: sentByMe,
           unreadCount: 0,
         });
       }

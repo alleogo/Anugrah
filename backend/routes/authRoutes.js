@@ -4,6 +4,8 @@ import {
   signup,
   login,
   logout,
+  forgotPassword,
+  resetPassword,
   deleteMyAccount,
   getMe,
   updateProfile,
@@ -21,6 +23,8 @@ router.post("/send-otp", sendOTP);
 router.post("/signup", signup);
 router.post("/login", login);
 router.post("/logout", logout);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 router.get("/public-stats", getPublicStats);
 router.get("/me", auth, getMe);
 router.delete("/me", auth, deleteMyAccount);

@@ -3,6 +3,7 @@ import AnugrahLogo from './AnugrahLogo';
 import { RoleBadge, roleGradient } from './Shared';
 import { fullName, getInitials } from '../utils/helpers';
 import {
+  MessageSquare,
   ChevronLeft,
   ChevronRight,
   LayoutDashboard,
@@ -41,6 +42,8 @@ export default function Sidebar({
   onOpenGeneralRequest,
   mentorPending = [],
   onRequestVerification,
+  onOpenMessages,
+  unreadMessages = 0,
 }) {
   if (!user) return null;
 
@@ -162,6 +165,21 @@ export default function Sidebar({
                 <LayoutDashboard size={18} />
               </span>
               {!isCollapsed && <span className="sidebar-nav-label">Dashboard</span>}
+            </button>
+
+            {/* Messages (conversations, including messages from the admin) */}
+            <button
+              type="button"
+              onClick={() => handleNavClick(onOpenMessages)}
+              className="sidebar-nav-item"
+              title={unreadMessages ? `Messages: ${unreadMessages} unread` : 'Messages'}
+            >
+              <span className="sidebar-nav-icon" style={{ position: 'relative' }}>
+                <MessageSquare size={18} />
+                {isCollapsed && unreadMessages > 0 && <span className="sidebar-pending-count">{unreadMessages}</span>}
+              </span>
+              {!isCollapsed && <span className="sidebar-nav-label">Messages</span>}
+              {!isCollapsed && unreadMessages > 0 && <span className="sidebar-unread">{unreadMessages}</span>}
             </button>
 
             {/* View Profile */}

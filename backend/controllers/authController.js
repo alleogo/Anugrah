@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import OTP from "../models/OTP.js";
 import { JWT_SECRET } from "../middleware/auth.js";
-import { mailSender, otpEmailTemplate } from "../utils/mailSender.js";
+import { mailSender, otpEmailTemplate, resetEmailTemplate } from "../utils/mailSender.js";
 import { deleteAvatar, uploadAvatar as uploadToCloudinary } from "../config/cloudinary.js";
 import { deleteUserAccount } from "../utils/accounts.js";
 import {
@@ -53,7 +53,7 @@ export const sendOTP = async (req, res) => {
     }
 
     const otp = crypto.randomInt(100000, 999999).toString();
-    await OTP.create({ email, otp });
+    await OTP.create({ email, otp, purpose: "signup" });
     await mailSender(email, "Anugrah - Your Email Verification Code", otpEmailTemplate(otp));
 
     return res.status(200).json({
@@ -107,14 +107,14 @@ export const signup = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email already registered" });
     }
 
-    const latestOtp = await OTP.findOne({ email: normalizedEmail }).sort({ createdAt: -1 });
+    const latestOtp = await OTP.findOne({ email: normalizedEmail, purpose: "signup" }).sort({ createdAt: -1 });
     if (!latestOtp || latestOtp.otp !== otp.trim()) {
       return res.status(400).json({
         success: false,
         message: "Invalid or expired verification code. Please request a new code via email.",
       });
     }
-    await OTP.deleteMany({ email: normalizedEmail });
+    await OTP.deleteMany({ email: normalizedEmail, purpose: "signup" });
 
     // New accounts start unapproved, with a verification request already sent to Admin
     const user = await User.create({
@@ -160,6 +160,76 @@ export const login = async (req, res) => {
     delete userData.password;
 
     return res.status(200).json({ success: true, message: "Login successful", token, user: userData });
+  } catch (error) {
+    return sendServerError(res, error);
+  }
+};
+
+// ── Forgot / reset password ──────────────────────────────────
+const RESET_ATTEMPT_LIMIT = 5;
+const RESET_RESEND_WAIT_MS = 60 * 1000;
+const RESET_SENT_MESSAGE = "If an account exists for this email, a reset code has been sent to it.";
+
+// Step 1: email a 6-digit reset code. The reply is the same whether or not the account exists,
+// so this form can't be used to find out who is registered.
+export const forgotPassword = async (req, res) => {
+  try {
+    const email = req.body.email?.trim().toLowerCase();
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ success: false, message: INVALID_EMAIL_MESSAGE });
+    }
+
+    const user = await User.findOne({ email });
+    if (user) {
+      // At most one code per minute, so the form can't be used to flood someone's inbox
+      const recent = await OTP.findOne({ email, purpose: "reset" }).sort({ createdAt: -1 });
+      if (!recent || Date.now() - recent.createdAt.getTime() > RESET_RESEND_WAIT_MS) {
+        const code = crypto.randomInt(100000, 999999).toString();
+        await OTP.deleteMany({ email, purpose: "reset" });
+        await OTP.create({ email, otp: await bcrypt.hash(code, 10), purpose: "reset" });
+        await mailSender(email, "Anugrah - Your Password Reset Code", resetEmailTemplate(code));
+      }
+    }
+
+    return res.status(200).json({ success: true, message: RESET_SENT_MESSAGE });
+  } catch (error) {
+    return sendServerError(res, error, `Failed to send the reset code: ${error.message}`);
+  }
+};
+
+// Step 2: check the code and set the new password
+export const resetPassword = async (req, res) => {
+  try {
+    const email = req.body.email?.trim().toLowerCase();
+    const code = String(req.body.code || "").trim();
+    const newPassword = String(req.body.newPassword || "");
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: "Your new password must be at least 6 characters." });
+    }
+
+    const invalid = () =>
+      res.status(400).json({ success: false, message: "Invalid or expired code. Request a new one." });
+
+    const entry = await OTP.findOne({ email, purpose: "reset" }).sort({ createdAt: -1 });
+    if (!entry || !code) return invalid();
+
+    if (!(await bcrypt.compare(code, entry.otp))) {
+      entry.attempts += 1;
+      if (entry.attempts >= RESET_ATTEMPT_LIMIT) await entry.deleteOne();
+      else await entry.save();
+      return invalid();
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) return invalid();
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.passwordChangedAt = new Date(Date.now() - 1000); // tokens issued from now on stay valid
+    await user.save();
+    await OTP.deleteMany({ email, purpose: "reset" });
+
+    return res.status(200).json({ success: true, message: "Password updated. Sign in with your new password." });
   } catch (error) {
     return sendServerError(res, error);
   }
