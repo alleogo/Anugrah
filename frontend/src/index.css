@@ -2579,17 +2579,11 @@ select.input-field option {
   z-index: 2400;
 }
 
-/* Logo image (navy and gold artwork) */
+/* Logo image */
 .anugrah-logo {
   display: inline-block;
   vertical-align: middle;
   flex-shrink: 0;
   box-sizing: border-box;
   object-fit: contain;
-}
-
-[data-theme='dark'] .anugrah-logo {
-  background: #fafaf9;
-  border-radius: 50%;
-  padding: 2px;
 }
