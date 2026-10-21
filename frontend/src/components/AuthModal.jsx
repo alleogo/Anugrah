@@ -313,19 +313,13 @@ export default function AuthModal({ onClose, onLoginSuccess, initialTab = 'login
             <div style={{ textAlign: 'center', marginBottom: '22px' }}>
               <div
                 style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: 'var(--radius-md)',
-                  background: 'linear-gradient(145deg, #181512 0%, #291e14 100%)',
-                  border: '1.5px solid rgba(245, 158, 11, 0.45)',
-                  boxShadow: '0 4px 14px rgba(0, 0, 0, 0.35), 0 0 12px rgba(245, 158, 11, 0.2)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   margin: '0 auto 12px auto',
                 }}
               >
-                <AnugrahLogo size={28} />
+                <AnugrahLogo size={56} />
               </div>
               <h2
                 style={{

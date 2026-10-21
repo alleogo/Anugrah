@@ -74,7 +74,7 @@ export default function Sidebar({
             title="Anugrah Platform Home"
           >
             <div className="sidebar-brand-icon">
-              <AnugrahLogo size={24} />
+              <AnugrahLogo size={38} />
             </div>
             {!isCollapsed && (
               <div className="sidebar-brand-text">

@@ -96,7 +96,7 @@ export default function LandingPage({ theme, onToggleTheme, onOpenAuth, stats })
     <div className="landing-page-container" ref={rootRef}>
       <header className="landing-nav">
         <div className="landing-nav-inner">
-          <BrandMark size={24} />
+          <BrandMark size={40} />
 
           <div className="landing-nav-actions">
             <button
@@ -146,7 +146,7 @@ export default function LandingPage({ theme, onToggleTheme, onOpenAuth, stats })
 
           <aside className="hero-panel hero-enter" style={{ '--i': 2 }} aria-label="Platform numbers">
             <div className="hero-panel-head">
-              <AnugrahLogo size={34} />
+              <AnugrahLogo size={40} />
               <div>
                 <h2 className="hero-panel-title">ANUGRAH at a glance</h2>
                 <p className="hero-panel-note">Live numbers from the platform</p>
@@ -227,7 +227,7 @@ export default function LandingPage({ theme, onToggleTheme, onOpenAuth, stats })
       <footer className="landing-footer">
         <div className="landing-footer-inner">
           <div className="footer-brand-col">
-            <BrandMark size={22} />
+            <BrandMark size={34} />
             <p className="footer-tagline">
               Mentorship, guided by intent and grace. Verified mentors, admin-reviewed matches.
             </p>

@@ -290,7 +290,7 @@ export default function App() {
             {/* Phone-only top bar: the sidebar is hidden off-screen until opened */}
             <header className="mobile-topbar">
               <div className="mobile-topbar-brand">
-                <AnugrahLogo size={22} />
+                <AnugrahLogo size={30} />
                 <span>ANUGRAH</span>
               </div>
               <button
